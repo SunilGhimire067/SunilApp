@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+    containers:
+      - name: grafana
+        image: grafana/grafana:8.3.2
+        ports:
+          - containerPort: 3000
+        volumeMounts:
+          - name: grafana-config
+            mountPath: /etc/grafana/provisioning/dashboards
+            readOnly: true
+          - name: grafana-dashboards
+            mountPath: /var/lib/grafana/dashboards
+    volumes:
+        - name: grafana-config
+          configMap:
+            name: grafana-config
+        - name: grafana-dashboards
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: ai
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: grafana
