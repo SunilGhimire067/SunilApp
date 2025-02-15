@@ -10,12 +10,18 @@ metadata:
     env: production
 data:
   nginx.conf: |
-    server {
-        listen 80;
-        server_name localhost;
-        location / {
-            root /usr/share/nginx/html;
-            index index.html;
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        server {
+            listen 80;
+            server_name localhost;
+            location / {
+                root /usr/share/nginx/html;
+                index index.html;
+            }
         }
     }
 ---
