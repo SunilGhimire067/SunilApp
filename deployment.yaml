@@ -1,46 +1,87 @@
+---
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  name: order-service
-spec:
-  selector:
-    app: order-service
-  ports:
-    - protocol: TCP
-      port: 8080
-      nodePort: 30081
-  type: NodePort
-  externalIPs:
-    - 1.2.4.120
+  name: nginx-config
+  namespace: default
+  labels:
+    app: nginx
+    tier: frontend
+    env: production
+data:
+  nginx.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+    }
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: nginx-deployment
+  namespace: default
+  labels:
+    app: nginx
 spec:
+  replicas: 2
   selector:
     matchLabels:
-      app: order-service
-  replicas: 2
+      app: nginx
   template:
     metadata:
       labels:
-        app: order-service
+        app: nginx
     spec:
       containers:
-        - name: order-service
-          image: order-service:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 8080
-          env:
-            - name: MONGO_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: username
-            - name: MONGO_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: password
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: config-volume
+        configMap:
+          name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: default
+  labels:
+    app: nginx
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: nginx.local
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 80
