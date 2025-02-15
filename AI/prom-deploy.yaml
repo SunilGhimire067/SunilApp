@@ -13,7 +13,7 @@ spec:
       labels:
         app: prometheus
     spec:
-      containers:
+    containers:
       - name: prometheus
         image: prom/prometheus:v2.36.0
         ports:
@@ -28,7 +28,7 @@ spec:
             mountPath: /etc/prometheus
           - name: prometheus-data
             mountPath: /prometheus/data
-      volumes:
+    volumes:
         - name: prometheus-config
           configMap:
             name: prometheus-config
