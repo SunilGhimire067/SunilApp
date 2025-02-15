@@ -20,7 +20,10 @@ spec:
           - containerPort: 3000
         env:
           - name: GF_SECURITY_ADMIN_PASSWORD
-            value: "admin"  # Set a default admin password (modify as needed)
+            valueFrom:
+              secretKeyRef:
+                name: grafana-secret
+                key: GF_SECURITY_ADMIN_PASSWORD
         volumeMounts:
           - name: grafana-config
             mountPath: /etc/grafana
