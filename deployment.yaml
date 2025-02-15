@@ -1,13 +1,9 @@
 ---
-apiVersion: v1
+aapiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-config
-  namespace: nginx
-  labels:
-    app: nginx
-    tier: frontend
-    env: production
+  namespace: default
 data:
   nginx.conf: |
     events {
@@ -24,6 +20,32 @@ data:
             }
         }
     }
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to Interactive Nginx!</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f0f0f0; }
+            h1 { color: #333; }
+            button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        </style>
+    </head>
+    <body>
+        <h1>🚀 Welcome to Your Custom Nginx Page! 🚀</h1>
+        <p>Click the button to see a message:</p>
+        <button onclick="showMessage()">Click Me!</button>
+        <p id="message"></p>
+        
+        <script>
+            function showMessage() {
+                document.getElementById('message').innerText = "🎉 Hello from Nginx! 🎉";
+            }
+        </script>
+    </body>
+    </html>
 ---
 apiVersion: apps/v1
 kind: Deployment
