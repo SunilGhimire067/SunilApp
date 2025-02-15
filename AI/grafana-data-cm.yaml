@@ -8,22 +8,120 @@ metadata:
 data:
   anomaly-dashboard.json: |
     {
-      "annotations": {
-        "list": []
-      },
-      "panels": [
-        {
-          "datasource": "Prometheus",
-          "id": 1,
-          "title": "Anomaly Detection",
-          "type": "graph",
-          "targets": [
-            {
-              "expr": "anomaly_detection_expression",
-              "interval": "",
-              "legendFormat": "Anomaly"
+      "dashboard": {
+        "id": null,
+        "uid": "anomaly-dashboard",
+        "title": "Anomaly Detection Dashboard",
+        "tags": [],
+        "timezone": "browser",
+        "schemaVersion": 27,
+        "version": 1,
+        "refresh": "5s",
+        "panels": [
+          {
+            "type": "graph",
+            "title": "CPU Usage with Anomaly Detection",
+            "id": 1,
+            "targets": [
+              {
+                "expr": "avg(rate(container_cpu_usage_seconds_total{container_name!=\"\",container_name!=\"POD\"}[1m])) by (container_name)",
+                "interval": "",
+                "legendFormat": "{{container_name}}",
+                "refId": "A"
+              }
+            ],
+            "xaxis": {
+              "mode": "time"
+            },
+            "yaxis": {
+              "format": "percent",
+              "label": "CPU Usage"
+            },
+            "pluginVersion": "7.3.0",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "unit": "percent",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 90,
+                        "color": "red"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "annotations": [],
+            "anomalyDetection": {
+              "enabled": true,
+              "model": "LSTM", 
+              "threshold": 2.5, 
+              "dataPoints": 100
             }
-          ]
-        }
-      ]
+          },
+          {
+            "type": "graph",
+            "title": "Memory Usage with Anomaly Detection",
+            "id": 2,
+            "targets": [
+              {
+                "expr": "avg(container_memory_usage_bytes{container_name!=\"\",container_name!=\"POD\"}) by (container_name)",
+                "interval": "",
+                "legendFormat": "{{container_name}}",
+                "refId": "B"
+              }
+            ],
+            "xaxis": {
+              "mode": "time"
+            },
+            "yaxis": {
+              "format": "bytes",
+              "label": "Memory Usage"
+            },
+            "pluginVersion": "7.3.0",
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "unit": "bytes",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 7000000000,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 8000000000,
+                        "color": "red"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "annotations": [],
+            "anomalyDetection": {
+              "enabled": true,
+              "model": "LSTM",
+              "threshold": 3.0,
+              "dataPoints": 100
+            }
+          }
+        ]
+      }
     }
