@@ -13,22 +13,29 @@ spec:
       labels:
         app: nginx
     spec:
-    containers:
+      containers:  # This must be correctly indented
         - name: nginx
           image: nginx:latest
           ports:
             - containerPort: 80
-    volumeMounts:
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: nginx-html
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+      volumes:
         - name: nginx-config
-          mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
+          configMap:
+            name: nginx-config
         - name: nginx-html
-          mountPath: /usr/share/nginx/html/index.html
-          subPath: index.html
-    resources:
-        requests:
-          cpu: "100m"      # Request 100 millicores (0.1 CPU)
-          memory: "128Mi"  # Request 128MB memory
-        limits:
-          cpu: "500m"      # Limit to 500 millicores (0.5 CPU)
-          memory: "256Mi"  # Limit to 256MB memory
+          configMap:
+            name: nginx-html
