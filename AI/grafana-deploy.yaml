@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: ai
+  namespace: monitoring
 spec:
   replicas: 1
   selector:
@@ -13,29 +13,31 @@ spec:
       labels:
         app: grafana
     spec:
-    containers:
+      containers:
       - name: grafana
-        image: grafana/grafana:8.3.2
+        image: grafana/grafana:8.5.0
         ports:
           - containerPort: 3000
+        env:
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            value: "admin"  # Set a default admin password (modify as needed)
         volumeMounts:
           - name: grafana-config
-            mountPath: /etc/grafana/provisioning/dashboards
-            readOnly: true
-          - name: grafana-dashboards
-            mountPath: /var/lib/grafana/dashboards
-    volumes:
+            mountPath: /etc/grafana
+          - name: grafana-data
+            mountPath: /var/lib/grafana
+      volumes:
         - name: grafana-config
           configMap:
             name: grafana-config
-        - name: grafana-dashboards
+        - name: grafana-data
           emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: grafana
-  namespace: ai
+  namespace: monitoring
 spec:
   ports:
     - port: 3000
